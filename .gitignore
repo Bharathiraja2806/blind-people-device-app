@@ -1,0 +1,14 @@
+.gradle/
+**/build/
+.venv/
+.ultralytics/
+__pycache__/
+*.py[cod]
+*.pt
+*.onnx
+!app/src/main/assets/yolo.onnx
+local.properties
+output/
+*.jks
+*.keystore
+bus.jpg

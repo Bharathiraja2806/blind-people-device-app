@@ -1,0 +1,48 @@
+{
+  "model": "Ultralytics YOLO11n",
+  "source": "Ultralytics official pretrained yolo11n.pt COCO weights",
+  "input": {
+    "name": "images",
+    "shape": [
+      1,
+      3,
+      640,
+      640
+    ],
+    "dtype": "tensor(float)",
+    "color": "RGB",
+    "layout": "NCHW",
+    "size": 640
+  },
+  "outputs": [
+    {
+      "name": "output0",
+      "shape": [
+        1,
+        84,
+        8400
+      ],
+      "dtype": "tensor(float)"
+    }
+  ],
+  "nms_in_graph": false,
+  "export": {
+    "opset": 17,
+    "imgsz": 640,
+    "dynamic": false,
+    "simplify": false
+  },
+  "onnx_bytes": 10701447,
+  "sample_inference": {
+    "source": "Ultralytics bus.jpg reference image",
+    "detections": 46,
+    "top_classes": [
+      "person",
+      "person",
+      "person",
+      "person",
+      "person"
+    ],
+    "status": "passed"
+  }
+}
