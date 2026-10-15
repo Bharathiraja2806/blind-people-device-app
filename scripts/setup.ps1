@@ -1,5 +1,25 @@
 $ErrorActionPreference = 'Stop'
 $failed = $false
+if (-not $env:JAVA_HOME -and -not (Get-Command java -ErrorAction SilentlyContinue)) {
+  $jdkRoots = @((Join-Path $env:ProgramFiles 'Microsoft'), (Join-Path $env:ProgramFiles 'Eclipse Adoptium'))
+  foreach ($jdkRoot in $jdkRoots) {
+    if (Test-Path $jdkRoot) {
+      $jdk = Get-ChildItem $jdkRoot -Directory -Filter 'jdk-17*' -ErrorAction SilentlyContinue | Sort-Object Name -Descending | Select-Object -First 1
+      if ($jdk) { $env:JAVA_HOME = $jdk.FullName; break }
+    }
+  }
+}
+if ($env:JAVA_HOME -and (Test-Path (Join-Path $env:JAVA_HOME 'bin'))) { $env:Path = "$(Join-Path $env:JAVA_HOME 'bin');$env:Path" }
+if (-not $env:ANDROID_SDK_ROOT -and -not $env:ANDROID_HOME) {
+  $defaultSdk = Join-Path $env:LOCALAPPDATA 'Android\Sdk'
+  if (Test-Path $defaultSdk) { $env:ANDROID_SDK_ROOT = $defaultSdk }
+}
+$sdkForPath = $env:ANDROID_SDK_ROOT; if (-not $sdkForPath) { $sdkForPath = $env:ANDROID_HOME }
+if ($sdkForPath -and (Test-Path $sdkForPath)) {
+  $env:ANDROID_SDK_ROOT = $sdkForPath
+  $env:ANDROID_HOME = $sdkForPath
+  $env:Path = "$(Join-Path $sdkForPath 'platform-tools');$(Join-Path $sdkForPath 'build-tools\35.0.0');$env:Path"
+}
 function Check-Command([string]$Name, [string]$Hint) {
   $cmd = Get-Command $Name -ErrorAction SilentlyContinue
   if ($cmd) { Write-Host "FOUND $Name -> $($cmd.Source)" -ForegroundColor Green }
@@ -9,10 +29,15 @@ Check-Command 'java' 'Install a JDK 17 and set JAVA_HOME/PATH.'
 Check-Command 'python' 'Install Python 3.10 or newer and add it to PATH.'
 Check-Command 'adb' 'Install Android SDK Platform Tools and add platform-tools to PATH.'
 if (Get-Command java -ErrorAction SilentlyContinue) {
-  $versionLine = (& java -version 2>&1 | Select-Object -First 1) -join ''
-  if ($versionLine -match 'version "([0-9]+)') {
-    if ([int]$Matches[1] -lt 17) { Write-Host "JDK 17+ required; detected $versionLine" -ForegroundColor Red; $failed = $true }
-    else { Write-Host "Java version: $versionLine" -ForegroundColor Green }
+  $savedPreference = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue' # java -version writes its version banner to stderr.
+  $versionOutput = (& java -version 2>&1 | Out-String)
+  $javaExit = $LASTEXITCODE
+  $ErrorActionPreference = $savedPreference
+  $versionMatch = [regex]::Match($versionOutput, 'version\s+"(?<major>\d+)')
+  if ($javaExit -eq 0 -and $versionMatch.Success) {
+    if ([int]$versionMatch.Groups['major'].Value -lt 17) { Write-Host "JDK 17+ required; detected $versionOutput" -ForegroundColor Red; $failed = $true }
+    else { Write-Host "Java version: $($versionMatch.Groups['major'].Value)+" -ForegroundColor Green }
   } else { Write-Host 'Could not determine Java version; verify JDK 17 or newer.' -ForegroundColor Red; $failed = $true }
 }
 if (Get-Command python -ErrorAction SilentlyContinue) {

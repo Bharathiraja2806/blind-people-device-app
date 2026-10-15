@@ -8,5 +8,4 @@ if "%JAVA_HOME%"=="" (
 )
 "%JAVA_EXE%" -classpath "%DIR%gradle\wrapper\gradle-wrapper.jar" org.gradle.wrapper.GradleWrapperMain %*
 set RESULT=%ERRORLEVEL%
-endlocal
-exit /b %RESULT%
+endlocal & exit /b %RESULT%

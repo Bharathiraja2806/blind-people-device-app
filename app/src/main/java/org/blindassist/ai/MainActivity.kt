@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         cooldown=prefs.getLong("cooldown_ms",3500L)
         val root=LinearLayout(this).apply { orientation=LinearLayout.VERTICAL; setPadding(20,18,20,12); setBackgroundColor(0xFF101820.toInt()) }
         val title=TextView(this).apply { text="Blind Assist AI"; textSize=25f; setTextColor(0xFFFFFFFF.toInt()); contentDescription="Blind Assist AI" }
-        status=TextView(this).apply { textSize=16f; setTextColor(0xFFFFD54F.toInt()); setPadding(0,10,0,10); liveRegion=View.ACCESSIBILITY_LIVE_REGION_POLITE }
+        status=TextView(this).apply { textSize=16f; setTextColor(0xFFFFD54F.toInt()); setPadding(0,10,0,10); setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE) }
         val cameraFrame=FrameLayout(this).apply { contentDescription="Live camera preview with detected object boxes" }
         preview=PreviewView(this).apply { scaleType=PreviewView.ScaleType.FIT_CENTER; contentDescription="Live camera preview" }
         overlay=DetectionOverlay(this).apply { importantForAccessibility=View.IMPORTANT_FOR_ACCESSIBILITY_NO }
@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             override fun onProgressChanged(s: SeekBar?,p:Int,user:Boolean) { val value=(p+10)/100f; detector?.confidenceThreshold=value; prefs.edit().putInt("confidence_percent",p+10).apply(); confidenceLabel.text="Minimum detection confidence: ${((p+10))}%" }
             override fun onStartTrackingTouch(s: SeekBar?) {} override fun onStopTrackingTouch(s: SeekBar?) {}
         }) }
-        recent=TextView(this).apply { text="Recent alerts: none"; textSize=17f; setTextColor(0xFFFFFFFF.toInt()); setPadding(0,10,0,5); contentDescription="Recent spoken alerts"; liveRegion=View.ACCESSIBILITY_LIVE_REGION_POLITE }
+        recent=TextView(this).apply { text="Recent alerts: none"; textSize=17f; setTextColor(0xFFFFFFFF.toInt()); setPadding(0,10,0,5); contentDescription="Recent spoken alerts"; setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE) }
         val safety=TextView(this).apply { text="Experimental assistance only. Keep using your white cane, guide dog, and mobility training. The app does not measure distance or guarantee a clear path."; textSize=14f; setTextColor(0xFFCFD8DC.toInt()) }
         root.addView(title); root.addView(status); root.addView(cameraFrame,LinearLayout.LayoutParams(-1,0,1f)); root.addView(startButton); root.addView(stopButton); root.addView(speechSwitch); root.addView(freqLabel); root.addView(freq); root.addView(rateLabel); root.addView(rate); root.addView(confidenceLabel); root.addView(confidence); root.addView(recent); root.addView(safety)
         setContentView(root)
